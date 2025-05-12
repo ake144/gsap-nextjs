@@ -1,103 +1,287 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useRef, useEffect, useState } from "react"
+import { gsap } from "gsap"
+import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
+import Link from "next/link"
+import { ArrowUpRight, Code2, Eye, ChevronLeft, ChevronRight } from "lucide-react"
+import { ProjectsData } from "@/components/data"
+import { cn } from "@/lib/utils"
+import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+
+gsap.registerPlugin(ScrollTrigger)
+
+const ModernScrollSection = () => {
+  const sectionRef = useRef<HTMLDivElement>(null)
+  const triggerRef = useRef<HTMLDivElement>(null)
+  const progressRef = useRef<HTMLDivElement>(null)
+  const [activeIndex, setActiveIndex] = useState(0)
+  const [isMobile, setIsMobile] = useState(false)
+
+  // Check if mobile on mount and on resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768)
+    }
+
+    checkMobile()
+    window.addEventListener("resize", checkMobile)
+
+    return () => window.removeEventListener("resize", checkMobile)
+  }, [])
+
+  useEffect(() => {
+    const ctx = gsap.context(() => {
+      // Main horizontal scroll animation
+      const totalProjects = ProjectsData.length
+      const totalWidth = isMobile ? totalProjects * 100 : (totalProjects - 1) * 80
+
+      const pin = gsap.fromTo(
+        sectionRef.current,
+        {
+          x: "0",
+        },
+        {
+          x: `-${totalWidth}vw`,
+          ease: "power1.inOut",
+          scrollTrigger: {
+            trigger: triggerRef.current,
+            start: "top top",
+            end: `+=${totalProjects * 1000}`,
+            scrub: 1,
+            pin: true,
+            onUpdate: (self) => {
+              // Update progress bar
+              if (progressRef.current) {
+                gsap.to(progressRef.current, {
+                  width: `${self.progress * 100}%`,
+                  duration: 0.1,
+                })
+              }
+
+              // Update active index
+              const newIndex = Math.min(Math.floor(self.progress * totalProjects), totalProjects - 1)
+              setActiveIndex(newIndex)
+            },
+          },
+        },
+      )
+
+      // Parallax effect for each project card
+      gsap.utils.toArray(".project-card").forEach((card: any, i) => {
+        gsap.fromTo(
+          card.querySelector(".project-image"),
+          {
+            scale: 1.1,
+            y: 0,
+          },
+          {
+            scale: 1,
+            y: -20,
+            ease: "none",
+            scrollTrigger: {
+              trigger: card,
+              containerAnimation: pin,
+              start: "left right",
+              end: "right left",
+              scrub: true,
+            },
+          },
+        )
+
+        // Fade in text elements with slight delay
+        gsap.fromTo(
+          card.querySelector(".project-content"),
+          {
+            y: 30,
+            opacity: 0,
+          },
+          {
+            y: 0,
+            opacity: 1,
+            ease: "power2.out",
+            scrollTrigger: {
+              trigger: card,
+              containerAnimation: pin,
+              start: "left center",
+              end: "center center",
+              scrub: true,
+            },
+          },
+        )
+      })
+
+      return () => pin.kill()
+    }, sectionRef)
+
+    return () => ctx.revert()
+  }, [isMobile])
+
+  const scrollToProject = (index: number) => {
+    if (!triggerRef.current) return
+
+    const scrollTrigger = ScrollTrigger.getById("project-scroll")
+    if (scrollTrigger) {
+      const progress = index / (ProjectsData.length - 1)
+      scrollTrigger.scroll(scrollTrigger.start + (scrollTrigger.end - scrollTrigger.start) * progress)
+    } else {
+      // Fallback if ScrollTrigger isn't available
+      const totalHeight = triggerRef.current.scrollHeight - window.innerHeight
+      const targetScroll = (index / (ProjectsData.length - 1)) * totalHeight
+      window.scrollTo({
+        top: targetScroll,
+        behavior: "smooth",
+      })
+    }
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <section className="relative overflow-hidden bg-gradient-to-b from-zinc-900 to-black text-white">
+      {/* Progress bar */}
+      <div className="fixed top-0 left-0 w-full h-1 bg-zinc-800 z-50">
+        <div ref={progressRef} className="h-full bg-gradient-to-r from-purple-500 to-cyan-500 w-0"></div>
+      </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+      {/* Navigation dots */}
+      <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden md:flex flex-col gap-4">
+        {ProjectsData.map((_, index) => (
+          <button
+            key={`nav-${index}`}
+            onClick={() => scrollToProject(index)}
+            className={cn(
+              "w-3 h-3 rounded-full transition-all duration-300",
+              activeIndex === index ? "bg-white scale-125" : "bg-zinc-600 hover:bg-zinc-400",
+            )}
+            aria-label={`Go to project ${index + 1}`}
+          />
+        ))}
+      </div>
+
+      {/* Section title */}
+      <div className="fixed left-8 top-8 z-40 mix-blend-difference">
+        <h2 className="text-xl font-bold tracking-tight">
+          <span className="text-white/70">Featured</span> Projects
+        </h2>
+      </div>
+
+      {/* Mobile navigation buttons */}
+      <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40 flex gap-4 md:hidden">
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => scrollToProject(Math.max(0, activeIndex - 1))}
+          disabled={activeIndex === 0}
+          className="bg-black/50 backdrop-blur-md border-zinc-700"
+        >
+          <ChevronLeft className="h-5 w-5" />
+        </Button>
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={() => scrollToProject(Math.min(ProjectsData.length - 1, activeIndex + 1))}
+          disabled={activeIndex === ProjectsData.length - 1}
+          className="bg-black/50 backdrop-blur-md border-zinc-700"
+        >
+          <ChevronRight className="h-5 w-5" />
+        </Button>
+      </div>
+
+      <div ref={triggerRef} className="h-screen">
+        <div
+          ref={sectionRef}
+          className="flex h-screen items-center"
+          style={{ width: `${ProjectsData.length * 100}vw` }}
+        >
+          {ProjectsData.map((project, index) => (
+            <div
+              key={project.id}
+              className={cn(
+                "project-card w-screen md:w-[80vw] h-screen flex items-center justify-center px-4 md:px-12 lg:px-24",
+                index === activeIndex ? "opacity-100" : "opacity-80",
+              )}
+            >
+              <div className="relative w-full max-w-6xl mx-auto flex flex-col md:flex-row gap-8 items-center">
+                {/* Project image with parallax effect */}
+                <div className="project-image relative w-full md:w-3/5 h-[40vh] md:h-[60vh] overflow-hidden rounded-2xl">
+                  <div
+                    className="absolute inset-0 bg-cover bg-center transform transition-transform duration-700 hover:scale-105"
+                    style={{ backgroundImage: `url(${project.image})` }}
+                  />
+
+                  {/* Floating tags */}
+                  <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                    {project.tags?.map((tag, i) => (
+                      <Badge key={i} className="bg-black/60 backdrop-blur-md text-white border-0 px-3 py-1">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {/* Hover overlay with links */}
+                  <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
+                    <Link
+                      href={project.gitUrl}
+                      className="flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full hover:bg-white/20 transition-all"
+                    >
+                      <Code2 className="h-4 w-4" />
+                      <span>Code</span>
+                    </Link>
+                    <Link
+                      href={project.previewUrl}
+                      className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full hover:bg-white/90 transition-all"
+                    >
+                      <Eye className="h-4 w-4" />
+                      <span>Preview</span>
+                    </Link>
+                  </div>
+                </div>
+
+                {/* Project content */}
+                <div className="project-content w-full md:w-2/5 space-y-6">
+                  <div>
+                    <h3 className="text-3xl md:text-4xl lg:text-5xl font-bold mb-2 bg-gradient-to-r from-white to-white/70 bg-clip-text text-transparent">
+                      {project.title}
+                    </h3>
+                    <p className="text-lg text-zinc-400 max-w-md">{project.description}</p>
+                  </div>
+
+                  {/* Project details */}
+                  <div className="space-y-4">
+                    {project.features && (
+                      <div className="space-y-2">
+                        <h4 className="text-sm uppercase tracking-wider text-zinc-500">Key Features</h4>
+                        <ul className="grid grid-cols-2 gap-2">
+                          {project.features.map((feature, i) => (
+                            <li key={i} className="flex items-center gap-2 text-zinc-300">
+                              <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
+                              {feature}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <div>
+                      <Button
+                        asChild
+                        className="group mt-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 border-0"
+                      >
+                        <Link href={project.previewUrl}>
+                          View Project
+                          <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
+                        </Link>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+      </div>
+    </section>
+  )
 }
+
+export default ModernScrollSection
