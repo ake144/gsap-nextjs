@@ -5,10 +5,10 @@ import { gsap } from "gsap"
 import { ScrollTrigger } from "gsap/dist/ScrollTrigger"
 import Link from "next/link"
 import { ArrowUpRight, Code2, Eye, ChevronLeft, ChevronRight } from "lucide-react"
-import { ProjectsData } from "@/components/data"
 import { cn } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
+import { Badge } from "../components/ui/badge"
+import { Button } from "../components/ui/button"
+import { ProjectsData } from "@/lib/data"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -211,7 +211,7 @@ const ModernScrollSection = () => {
 
                   {/* Floating tags */}
                   <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                    {project.tags?.map((tag, i) => (
+                    {project.tag?.map((tag, i) => (
                       <Badge key={i} className="bg-black/60 backdrop-blur-md text-white border-0 px-3 py-1">
                         {tag}
                       </Badge>
@@ -248,11 +248,11 @@ const ModernScrollSection = () => {
 
                   {/* Project details */}
                   <div className="space-y-4">
-                    {project.features && (
+                    {/* {project.description && (
                       <div className="space-y-2">
                         <h4 className="text-sm uppercase tracking-wider text-zinc-500">Key Features</h4>
                         <ul className="grid grid-cols-2 gap-2">
-                          {project.features.map((feature, i) => (
+                          {project.description.map((feature, i) => (
                             <li key={i} className="flex items-center gap-2 text-zinc-300">
                               <div className="w-1.5 h-1.5 rounded-full bg-purple-500" />
                               {feature}
@@ -260,7 +260,7 @@ const ModernScrollSection = () => {
                           ))}
                         </ul>
                       </div>
-                    )}
+                    )} */}
 
                     <div>
                       <Button
