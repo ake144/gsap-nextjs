@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils"
 import { Badge } from "../components/ui/badge"
 import { Button } from "../components/ui/button"
 import { ProjectsData } from "@/lib/data"
+import ModernButton from "@/components/button"
 
 gsap.registerPlugin(ScrollTrigger)
 
@@ -144,7 +145,7 @@ const ModernScrollSection = () => {
       </div>
 
       {/* Navigation dots */}
-      <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden md:flex flex-col gap-4">
+      {/* <div className="fixed right-8 top-1/2 transform -translate-y-1/2 z-50 hidden md:flex flex-col gap-4">
         {ProjectsData.map((_, index) => (
           <button
             key={`nav-${index}`}
@@ -156,10 +157,10 @@ const ModernScrollSection = () => {
             aria-label={`Go to project ${index + 1}`}
           />
         ))}
-      </div>
+      </div> */}
 
       {/* Section title */}
-      <div className="fixed left-8 top-8 z-40 mix-blend-difference">
+      <div className="fixed left-8 top-8 mb-15 z-40 mix-blend-difference">
         <h2 className="text-xl font-bold tracking-tight">
           <span className="text-white/70">Featured</span> Projects
         </h2>
@@ -210,13 +211,13 @@ const ModernScrollSection = () => {
                   />
 
                   {/* Floating tags */}
-                  <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                  {/* <div className="absolute top-4 left-4 flex flex-wrap gap-2">
                     {project.tag?.map((tag, i) => (
                       <Badge key={i} className="bg-black/60 backdrop-blur-md text-white border-0 px-3 py-1">
                         {tag}
                       </Badge>
                     ))}
-                  </div>
+                  </div> */}
 
                   {/* Hover overlay with links */}
                   <div className="absolute inset-0 bg-black/60 opacity-0 hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-4">
@@ -224,15 +225,15 @@ const ModernScrollSection = () => {
                       href={project.gitUrl}
                       className="flex items-center gap-2 bg-white/10 backdrop-blur-md text-white px-4 py-2 rounded-full hover:bg-white/20 transition-all"
                     >
-                      <Code2 className="h-4 w-4" />
-                      <span>Code</span>
+                      <Code2 className="h-3 w-4" />
+                      <span className="text-xs mr-7 ">Code</span>
                     </Link>
                     <Link
                       href={project.previewUrl}
                       className="flex items-center gap-2 bg-white text-black px-4 py-2 rounded-full hover:bg-white/90 transition-all"
                     >
-                      <Eye className="h-4 w-4" />
-                      <span>Preview</span>
+                      <Eye className="h-3 w-3" />
+                      <span className="text-xs pr-7">Preview</span>
                     </Link>
                   </div>
                 </div>
@@ -247,7 +248,7 @@ const ModernScrollSection = () => {
                   </div>
 
                   {/* Project details */}
-                  <div className="space-y-4">
+                  <div className="space-y-20">
                     {/* {project.description && (
                       <div className="space-y-2">
                         <h4 className="text-sm uppercase tracking-wider text-zinc-500">Key Features</h4>
@@ -262,16 +263,11 @@ const ModernScrollSection = () => {
                       </div>
                     )} */}
 
-                    <div>
-                      <Button
-                        asChild
-                        className="group mt-4 bg-gradient-to-r from-purple-600 to-cyan-600 hover:from-purple-700 hover:to-cyan-700 border-0"
-                      >
-                        <Link href={project.previewUrl}>
-                          View Project
-                          <ArrowUpRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
-                        </Link>
-                      </Button>
+                    <div className="flex items-center gap-4 my-19"> 
+                      <ModernButton   
+                        children="Explore Project"
+                        onClick={() => scrollToProject(index)}
+                        />
                     </div>
                   </div>
                 </div>
