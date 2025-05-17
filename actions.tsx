@@ -6,7 +6,7 @@ import { console } from 'inspector'
 import { headers } from 'next/headers'
  
 
-export async function publishNotification(formData: FormData) {
+export async function publishNotification(formData: any) {
   'use server'
   const redis = Redis.fromEnv()
 

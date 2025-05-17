@@ -1,5 +1,6 @@
 'use client'
  
+import { publishNotification } from '@/actions'
 import { useEffect } from 'react'
 import { useFormStatus } from 'react-dom'
  
@@ -14,8 +15,8 @@ const Form = () => {
   }, [pending])
  
   return (
-    <>
-      <input placeholder="Your message" className="border rounded px-3 outline-none focus:border-black/50 py-2" type="text" name="message" required />
+    <form action={publishNotification} id="publish-form" className="flex flex-col gap-y-2  bg-white/50 p-4 rounded">
+      <input placeholder="Your message" className="border rounded px-3 outline-none focus:border-black/50 py-2" type="text"  name="message" required />
       <button
 				/* Disable button click while the form submission is pending */
 				disabled={pending}
@@ -31,7 +32,7 @@ const Form = () => {
           <>Publish Notification &rarr;</>
         )}
       </button>
-    </>
+    </form>
   )
 }
  

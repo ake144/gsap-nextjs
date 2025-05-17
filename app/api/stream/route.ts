@@ -1,6 +1,4 @@
-// File: app/api/stream/route.js
- 
-// Prevents this route's response from being cached on Vercel
+
 export const dynamic = 'force-dynamic'
  
 export async function GET() {
